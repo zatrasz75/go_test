@@ -1,0 +1,45 @@
+server:
+  host: localhost
+  port: 3333
+  read-timeout: 3s
+  write-timeout: 3s
+  idle-timeout: 6s
+  shutdown-timeout: 10s
+
+database:
+  host: postgres
+  username: postgres
+  password: postgrespw
+  db-url: localhost
+  db-name: clean-copy
+  port: 5432
+
+  pool-max: 2
+  conn-attempts: 10
+  conn-timeout: 1s
+
+  redis:
+    addr: localhost:6379
+    Password:
+    db: 0
+    protocol: 3
+    pool-size: 10
+    pool-timeout: 5s
+
+nats:
+  nats-natsURL: nats://ruser:T0pS3cr3t@localhost:4222
+  nats-reconnect: true
+  nats-max-reconnect: 10
+  nats-wait-reconnect: 1s
+  nats-timeout: 1s
+
+clickhouse:
+  host: localhost
+  port: 8123
+  user-ch: admin
+  password-ch: rootroot
+  name-ch: clean_copy
+  access-ch: 1
+
+  conn-attempts: 10
+  conn-timeout: 1s
