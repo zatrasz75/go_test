@@ -44,11 +44,11 @@ type Config struct {
 		Expiration   time.Duration `yaml:"redis-exp" env:"REDIS_EXP" env-description:"redis Expiration" env-default:"1m"`
 	} `yaml:"redis"`
 	Nats struct {
-		NatsURL        string        `yaml:"nats-natsURL" env:"NATS_CONNECT_URL" env-description:"nats NatsURL"`
-		AllowReconnect bool          `yaml:"nats-reconnect" env:"NATS_ALLOW_RECONNECT" env-description:"nats AllowReconnect" env-default:"true"`
-		MaxReconnect   int           `yaml:"nats-max-reconnect" env:"NATS_MAX_RECONNECT" env-description:"nats MaxReconnect" env-default:"10"`
-		ReconnectWait  time.Duration `yaml:"nats-wait-reconnect" env:"NATS_WAIT_RECONNECT" env-description:"nats ReconnectWait" env-default:"1s"`
-		Timeout        time.Duration `yaml:"nats-timeout" env:"NATS_TIMEOUT" env-description:"nats timeout" env-default:"1s"`
+		NatsURL        string        `yaml:"nats-natsURL" env:"NATS_CONNECT_URL" env-description:"reponats NatsURL"`
+		AllowReconnect bool          `yaml:"nats-reconnect" env:"NATS_ALLOW_RECONNECT" env-description:"reponats AllowReconnect" env-default:"true"`
+		MaxReconnect   int           `yaml:"nats-max-reconnect" env:"NATS_MAX_RECONNECT" env-description:"reponats MaxReconnect" env-default:"10"`
+		ReconnectWait  time.Duration `yaml:"nats-wait-reconnect" env:"NATS_WAIT_RECONNECT" env-description:"reponats ReconnectWait" env-default:"1s"`
+		Timeout        time.Duration `yaml:"nats-timeout" env:"NATS_TIMEOUT" env-description:"reponats timeout" env-default:"1s"`
 	} `yaml:"nats"`
 	Clickhouse struct {
 		DSN string `env:"DSN_CONNECTION_STRING" env-description:"DSN string"`
