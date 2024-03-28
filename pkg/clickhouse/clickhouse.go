@@ -2,11 +2,13 @@ package clickhouse
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
 	"time"
+	"zatrasz75/go_test/models"
 	"zatrasz75/go_test/pkg/logger"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
@@ -74,5 +76,26 @@ func (c *Clickhouse) Migrate() error {
 			}
 		}
 	}
+	return nil
+}
+
+func (s *Clickhouse) InsertData(msg []byte) error {
+	var click models.Click
+	if err := json.Unmarshal(msg, &click); err != nil {
+		return err
+	}
+
+	// Преобразуем удаленное поле из bool в UInt8 в соответствии со схемой таблицы ClickHouse
+	removed := uint8(0)
+	if click.Removed {
+		removed = 1
+	}
+
+	_, err := s.ch.Exec("INSERT INTO clicks (ID, Projectid, Name, Description, Priority, Removed, EventTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		click.ID, click.Projectid, click.Name, click.Description, click.Priority, removed, click.EventTime)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

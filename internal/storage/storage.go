@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"time"
 	"zatrasz75/go_test/models"
 )
 
@@ -25,7 +26,14 @@ type RedisInterface interface {
 }
 
 type NatsInterface interface {
-	Publish(subject string, data []byte) error
+	// SendLog отправляет сообщение на указанную тему subject.
+	SendLog(subject string, data []byte) error
+	// Flush гарантирует, что все сообщения были обработаны сервером.
+	Flush() error
+	// FlushTimeout гарантирует, что все сообщения были обработаны сервером в течение указанного времени ожидания.
+	FlushTimeout(timeout time.Duration) error
+	// SubscribeToLogs подписывается на тему 'logs' и обрабатывает полученные сообщения.
+	SubscribeToLogs()
 }
 
 type ClickhouseInterface interface {

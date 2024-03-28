@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strconv"
 	"zatrasz75/go_test/configs"
-	"zatrasz75/go_test/internal/click"
 	"zatrasz75/go_test/internal/redis"
-	"zatrasz75/go_test/internal/reponats"
 	"zatrasz75/go_test/internal/repository"
 	"zatrasz75/go_test/internal/storage"
 	"zatrasz75/go_test/models"
 	"zatrasz75/go_test/pkg/logger"
+	"zatrasz75/go_test/pkg/nats"
 )
 
 type api struct {
@@ -22,11 +22,10 @@ type api struct {
 	repo storage.RepositoryInterface
 	rd   storage.RedisInterface
 	nc   storage.NatsInterface
-	cl   storage.ClickhouseInterface
 }
 
-func newEndpoint(r *mux.Router, cfg *configs.Config, l logger.LoggersInterface, repo *repository.Store, rd *redis.Store, n *reponats.Store, cl *click.Store) {
-	en := &api{cfg, l, repo, rd, n, cl}
+func newEndpoint(r *mux.Router, cfg *configs.Config, l logger.LoggersInterface, repo *repository.Store, rd *redis.Store, n *nats.Nats) {
+	en := &api{cfg, l, repo, rd, n}
 
 	r.HandleFunc("/", en.home).Methods(http.MethodGet)
 	r.HandleFunc("/goods/list", en.goodsList).Methods(http.MethodGet)
@@ -63,9 +62,9 @@ func (a *api) home(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	// Отправляем сообщение через NATS
-	subject := "welcome"
+	subject := "logs"
 	message := []byte("Пользователь посетил главную страницу")
-	err = a.nc.Publish(subject, message)
+	err = a.nc.SendLog(subject, message)
 	if err != nil {
 		a.l.Error("Ошибка отправки сообщения через NATS", err)
 	}
@@ -191,6 +190,16 @@ func (a *api) goodCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = a.nc.SendLog("logs", jsonList)
+	if err != nil {
+		a.l.Error("Ошибка при отправки данных в logs", err)
+		http.Error(w, "Ошибка при отправки данных в logs", http.StatusInternalServerError)
+		return
+	}
+	if err = a.nc.Flush(); err != nil {
+		log.Fatal(err)
+	}
+
 	// Устанавливаем правильный Content-Type для JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -266,6 +275,16 @@ func (a *api) goodUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = a.nc.SendLog("logs", jsonList)
+	if err != nil {
+		a.l.Error("Ошибка при отправки данных в logs", err)
+		http.Error(w, "Ошибка при отправки данных в logs", http.StatusInternalServerError)
+		return
+	}
+	if err = a.nc.Flush(); err != nil {
+		log.Fatal(err)
+	}
+
 	// Устанавливаем правильный Content-Type для JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -321,6 +340,24 @@ func (a *api) goodRemove(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ошибка при форматировании данных", http.StatusInternalServerError)
 		a.l.Error("ошибка при форматировании данных: ", err)
 		return
+	}
+
+	g.Removed = true
+
+	jsonList, err := json.Marshal(g)
+	if err != nil {
+		http.Error(w, "ошибка при форматировании данных", http.StatusInternalServerError)
+		a.l.Error("ошибка при форматировании данных: ", err)
+		return
+	}
+	err = a.nc.SendLog("logs", jsonList)
+	if err != nil {
+		a.l.Error("Ошибка при отправки данных в logs", err)
+		http.Error(w, "Ошибка при отправки данных в logs", http.StatusInternalServerError)
+		return
+	}
+	if err = a.nc.Flush(); err != nil {
+		log.Fatal(err)
 	}
 
 	// Устанавливаем правильный Content-Type для JSON

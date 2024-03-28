@@ -23,19 +23,19 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
-    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --http_port 8222 --user ruser --pass T0pS3cr3t"
+    command: "--cluster_name NATS --cluster reponats://0.0.0.0:6222 --http_port 8222 --user ruser --pass T0pS3cr3t"
     networks:
       - nats
   nats-1:
     image: nats
-    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222 --user ruser --pass T0pS3cr3t"
+    command: "--cluster_name NATS --cluster reponats://0.0.0.0:6222 --routes=reponats://ruser:T0pS3cr3t@reponats:6222 --user ruser --pass T0pS3cr3t"
     depends_on:
       - nats
     networks:
       - nats
   nats-2:
     image: nats
-    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222 --user ruser --pass T0pS3cr3t"
+    command: "--cluster_name NATS --cluster reponats://0.0.0.0:6222 --routes=reponats://ruser:T0pS3cr3t@reponats:6222 --user ruser --pass T0pS3cr3t"
     depends_on:
       - nats
     networks:
