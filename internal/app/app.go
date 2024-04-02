@@ -9,7 +9,6 @@ import (
 	"zatrasz75/go_test/internal/click"
 	"zatrasz75/go_test/internal/controller"
 	"zatrasz75/go_test/internal/redis"
-	"zatrasz75/go_test/internal/reponats"
 	"zatrasz75/go_test/internal/repository"
 	"zatrasz75/go_test/pkg/clickhouse"
 	"zatrasz75/go_test/pkg/logger"
@@ -46,7 +45,7 @@ func Run(cfg *configs.Config, l logger.LoggersInterface) {
 		}
 	}(rds.Rds)
 
-	nc, err := nats.New(cfg.Nats.NatsURL, nats.OptionSet(cfg.Nats.AllowReconnect, cfg.Nats.MaxReconnect, cfg.Nats.ReconnectWait, cfg.Nats.Timeout))
+	nc, err := nats.New(cfg.Nats.NatsURL, l, nats.OptionSet(cfg.Nats.MaxReconnect, cfg.Nats.ReconnectWait, cfg.Nats.Timeout))
 	if err != nil {
 		l.Fatal("ошибка запуска - nats.New", err)
 	}
@@ -62,12 +61,18 @@ func Run(cfg *configs.Config, l logger.LoggersInterface) {
 		l.Fatal("ошибка миграции", err)
 	}
 
-	r := repository.New(pg, l)
+	repo := repository.New(pg, l)
 	rd := redis.New(rds, l)
-	n := reponats.New(nc, l)
-	cl := click.New(ch, l)
+	cl := click.New(ch, nc, l)
 
-	router := controller.NewRouter(cfg, l, r, rd, n, cl)
+	go func() {
+		err = cl.InsertLogsClickhouse()
+		if err != nil {
+			return
+		}
+	}()
+
+	router := controller.NewRouter(cfg, l, repo, rd, nc)
 
 	srv := server.New(router, server.OptionSet(cfg.Server.AddrHost, cfg.Server.AddrPort, cfg.Server.ReadTimeout, cfg.Server.WriteTimeout, cfg.Server.IdleTimeout, cfg.Server.ShutdownTime))
 

@@ -18,20 +18,20 @@ database:
   conn-attempts: 10
   conn-timeout: 1s
 
-  redis:
-    addr: localhost:6379
-    Password:
-    db: 0
-    protocol: 3
-    pool-size: 10
-    pool-timeout: 5s
+redis:
+  addr: localhost:6379
+  Password:
+  db: 0
+  protocol: 3
+  pool-size: 10
+  pool-timeout: 5s
 
 nats:
-  nats-natsURL: nats://ruser:T0pS3cr3t@localhost:4222
-  nats-reconnect: true
+  nats-natsURL: reponats://ruser:T0pS3cr3t@localhost:4222
+
   nats-max-reconnect: 10
   nats-wait-reconnect: 1s
-  nats-timeout: 1s
+  nats-timeout: 2s
 
 clickhouse:
   host: localhost
