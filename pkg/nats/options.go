@@ -5,18 +5,11 @@ import "time"
 // Option -.
 type Option func(*Nats)
 
-func OptionSet(allow bool, size int, wait, timeout time.Duration) Option {
+func OptionSet(size int, wait, timeout time.Duration) Option {
 	return func(n *Nats) {
-		AllowReconnect(allow)(n)
 		MaxSize(size)(n)
 		WaitSize(wait)(n)
-		ConnTimeout(timeout)(n)
-	}
-}
-
-func AllowReconnect(allow bool) Option {
-	return func(n *Nats) {
-		n.allowReconnect = allow
+		Timeout(timeout)(n)
 	}
 }
 
@@ -32,7 +25,7 @@ func WaitSize(wait time.Duration) Option {
 	}
 }
 
-func ConnTimeout(timeout time.Duration) Option {
+func Timeout(timeout time.Duration) Option {
 	return func(n *Nats) {
 		n.timeout = timeout
 	}

@@ -45,7 +45,7 @@ func Run(cfg *configs.Config, l logger.LoggersInterface) {
 		}
 	}(rds.Rds)
 
-	nc, err := nats.New(cfg.Nats.NatsURL, nats.OptionSet(cfg.Nats.AllowReconnect, cfg.Nats.MaxReconnect, cfg.Nats.ReconnectWait, cfg.Nats.Timeout))
+	nc, err := nats.New(cfg.Nats.NatsURL, l, nats.OptionSet(cfg.Nats.MaxReconnect, cfg.Nats.ReconnectWait, cfg.Nats.Timeout))
 	if err != nil {
 		l.Fatal("ошибка запуска - nats.New", err)
 	}

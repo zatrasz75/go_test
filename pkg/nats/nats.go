@@ -5,6 +5,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"log"
 	"time"
+	"zatrasz75/go_test/pkg/logger"
 )
 
 type Nats struct {
@@ -14,9 +15,11 @@ type Nats struct {
 	maxReconnect   int
 	reconnectWait  time.Duration
 	timeout        time.Duration
+	connAttempts   int
+	connTimeout    time.Duration
 }
 
-func New(natsURL string, opts ...Option) (*Nats, error) {
+func New(natsURL string, l logger.LoggersInterface, opts ...Option) (*Nats, error) {
 	n := &Nats{}
 
 	// Пользовательские параметры
@@ -25,9 +28,28 @@ func New(natsURL string, opts ...Option) (*Nats, error) {
 	}
 
 	var err error
-	n.nc, err = nats.Connect(natsURL, nats.ReconnectWait(n.reconnectWait), nats.MaxReconnects(n.maxReconnect), nats.Timeout(n.timeout))
+
+	for n.maxReconnect > 0 {
+		// Настройка параметров повторного подключения
+		var natsOpts []nats.Option
+
+		natsOpts = append(natsOpts, nats.ReconnectWait(n.reconnectWait), nats.MaxReconnects(n.maxReconnect))
+
+		// Добавляем параметры таймаута
+		natsOpts = append(natsOpts, nats.Timeout(n.timeout))
+
+		n.nc, err = nats.Connect(natsURL, natsOpts...)
+		if err == nil {
+			break
+		}
+		l.Info("NATS пытается подключиться, попыток осталось: %d", n.maxReconnect)
+
+		time.Sleep(n.timeout)
+
+		n.maxReconnect--
+	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("nats - New - maxReconnect == 0: %w", err)
 	}
 
 	return n, nil
@@ -74,7 +96,6 @@ func (n *Nats) SubscribeToLogs() {
 	for {
 		msg, err := sub.NextMsg(nats.DefaultTimeout)
 		if err != nil {
-			fmt.Println("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
 			log.Fatal(err)
 		}
 
@@ -85,7 +106,5 @@ func (n *Nats) SubscribeToLogs() {
 
 // handleLogMessage обрабатывает полученное сообщение.
 func (n *Nats) handleLogMessage(msg *nats.Msg) {
-	// Здесь вы можете обработать сообщение, например, записать его в лог или в базу данных.
-	// В данном примере мы просто выводим сообщение в консоль.
 	fmt.Printf("Received a message: %s\n", string(msg.Data))
 }

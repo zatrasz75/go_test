@@ -28,10 +28,10 @@ redis:
 
 nats:
   nats-natsURL: reponats://ruser:T0pS3cr3t@localhost:4222
-  nats-reconnect: true
+
   nats-max-reconnect: 10
   nats-wait-reconnect: 1s
-  nats-timeout: 10s
+  nats-timeout: 2s
 
 clickhouse:
   host: localhost

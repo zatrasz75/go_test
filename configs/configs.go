@@ -39,16 +39,16 @@ type Config struct {
 		PoolSize    int           `yaml:"pool-size" env:"REDIS_POOL_SIZE" env-description:"redis PoolSize" env-default:"10"`
 		PoolTimeout time.Duration `yaml:"pool-timeout" env:"REDIS_POOL_TIMEOUT" env-description:"redis PoolTimeout" env-default:"5s"`
 
-		ConnAttempts int           `yaml:"redis-attempts" env:"REDIS_CONN_ATTEMPTS" env-description:"redis ConnAttempts"`
-		ConnTimeout  time.Duration `yaml:"redis-timeout" env:"REDIS_TIMEOUT" env-description:"redis ConnTimeout"`
+		ConnAttempts int           `yaml:"redis-attempts" env:"REDIS_CONN_ATTEMPTS" env-description:"redis ConnAttempts" env-default:"10"`
+		ConnTimeout  time.Duration `yaml:"redis-timeout" env:"REDIS_TIMEOUT" env-description:"redis ConnTimeout" env-default:"1s"`
 		Expiration   time.Duration `yaml:"redis-exp" env:"REDIS_EXP" env-description:"redis Expiration" env-default:"1m"`
 	} `yaml:"redis"`
 	Nats struct {
-		NatsURL        string        `yaml:"nats-natsURL" env:"NATS_CONNECT_URL" env-description:"reponats NatsURL"`
-		AllowReconnect bool          `yaml:"nats-reconnect" env:"NATS_ALLOW_RECONNECT" env-description:"reponats AllowReconnect" env-default:"true"`
-		MaxReconnect   int           `yaml:"nats-max-reconnect" env:"NATS_MAX_RECONNECT" env-description:"reponats MaxReconnect" env-default:"10"`
-		ReconnectWait  time.Duration `yaml:"nats-wait-reconnect" env:"NATS_WAIT_RECONNECT" env-description:"reponats ReconnectWait" env-default:"1s"`
-		Timeout        time.Duration `yaml:"nats-timeout" env:"NATS_TIMEOUT" env-description:"reponats timeout" env-default:"1s"`
+		NatsURL string `yaml:"nats-natsURL" env:"NATS_CONNECT_URL" env-description:"reponats NatsURL"`
+
+		MaxReconnect  int           `yaml:"nats-max-reconnect" env:"NATS_MAX_RECONNECT" env-description:"reponats MaxReconnect" env-default:"10"`
+		ReconnectWait time.Duration `yaml:"nats-wait-reconnect" env:"NATS_WAIT_RECONNECT" env-description:"reponats ReconnectWait" env-default:"1s"`
+		Timeout       time.Duration `yaml:"nats-timeout" env:"NATS_TIMEOUT" env-description:"reponats timeout" env-default:"1s"`
 	} `yaml:"nats"`
 	Clickhouse struct {
 		DSN string `env:"DSN_CONNECTION_STRING" env-description:"DSN string"`
